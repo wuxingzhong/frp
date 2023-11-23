@@ -277,6 +277,7 @@ type HTTPProxyConfig struct {
 	HTTPUser          string           `json:"httpUser,omitempty"`
 	HTTPPassword      string           `json:"httpPassword,omitempty"`
 	HostHeaderRewrite string           `json:"hostHeaderRewrite,omitempty"`
+	UsePathRoute      bool             `json:"usePathRoute,omitempty"`
 	RequestHeaders    HeaderOperations `json:"requestHeaders,omitempty"`
 	RouteByHTTPUser   string           `json:"routeByHTTPUser,omitempty"`
 }
@@ -288,6 +289,7 @@ func (c *HTTPProxyConfig) MarshalToMsg(m *msg.NewProxy) {
 	m.SubDomain = c.SubDomain
 	m.Locations = c.Locations
 	m.HostHeaderRewrite = c.HostHeaderRewrite
+	m.UsePathRoute = c.UsePathRoute
 	m.HTTPUser = c.HTTPUser
 	m.HTTPPwd = c.HTTPPassword
 	m.Headers = c.RequestHeaders.Set
@@ -301,6 +303,7 @@ func (c *HTTPProxyConfig) UnmarshalFromMsg(m *msg.NewProxy) {
 	c.SubDomain = m.SubDomain
 	c.Locations = m.Locations
 	c.HostHeaderRewrite = m.HostHeaderRewrite
+	c.UsePathRoute = m.UsePathRoute
 	c.HTTPUser = m.HTTPUser
 	c.HTTPPassword = m.HTTPPwd
 	c.RequestHeaders.Set = m.Headers

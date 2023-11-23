@@ -107,6 +107,7 @@ type NewProxy struct {
 	HTTPUser          string            `json:"http_user,omitempty"`
 	HTTPPwd           string            `json:"http_pwd,omitempty"`
 	HostHeaderRewrite string            `json:"host_header_rewrite,omitempty"`
+	UsePathRoute      bool              `json:"use_path_route,omitempty"`
 	Headers           map[string]string `json:"headers,omitempty"`
 	RouteByHTTPUser   string            `json:"route_by_http_user,omitempty"`
 

@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 
@@ -159,7 +160,11 @@ func (rp *HTTPReverseProxy) GetHeaders(domain, location, routeByHTTPUser string)
 
 // CreateConnection create a new connection by route config
 func (rp *HTTPReverseProxy) CreateConnection(reqRouteInfo *RequestRouteInfo, byEndpoint bool) (net.Conn, error) {
-	host, _ := util.CanonicalHost(reqRouteInfo.Host)
+	routeKey := reqRouteInfo.Host
+	if reqRouteInfo.RoutePath != "" {
+		routeKey = reqRouteInfo.RoutePath
+	}
+	host, _ := util.CanonicalHost(routeKey)
 	vr, ok := rp.getVhost(host, reqRouteInfo.URL, reqRouteInfo.HTTPUser)
 	if ok {
 		if byEndpoint {
@@ -289,13 +294,34 @@ func (rp *HTTPReverseProxy) injectRequestInfoToCtx(req *http.Request) *http.Requ
 	if user == "" {
 		user, _, _ = req.BasicAuth()
 	}
+	routePath := ""
+	subPath := ""
+	// 截取req.path中的第一级路径
+	strs := strings.Split(req.URL.Path, "/")
+	if len(strs) > 1 {
+		routePath = strs[1]
+		subPath = path.Join(strs[2:]...)
+		subPath = path.Join("/", subPath)
+	}
 
+	rc1 := rp.GetRouteConfig(req.Host, req.URL.Path, user)
+	rc2 := rp.GetRouteConfig(routePath, subPath, user)
+	if rc1 != nil && rc1.UsePathRoute {
+		req.URL.Path = subPath
+	}
+	if rc2 != nil && rc2.UsePathRoute {
+		req.URL.Path = subPath
+	}
+	if rc1 != nil && rc2 == nil {
+		routePath = ""
+	}
 	reqRouteInfo := &RequestRouteInfo{
 		URL:        req.URL.Path,
 		Host:       req.Host,
 		HTTPUser:   user,
 		RemoteAddr: req.RemoteAddr,
 		URLHost:    req.URL.Host,
+		RoutePath:  routePath,
 	}
 	newctx := req.Context()
 	newctx = context.WithValue(newctx, RouteInfoKey, reqRouteInfo)

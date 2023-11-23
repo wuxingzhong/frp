@@ -39,6 +39,7 @@ type RequestRouteInfo struct {
 	RemoteAddr string
 	URLHost    string
 	Endpoint   string
+	RoutePath  string // 增加路径路由
 }
 
 type (
@@ -113,6 +114,7 @@ type RouteConfig struct {
 	Username        string
 	Password        string
 	Headers         map[string]string
+	UsePathRoute    bool
 	RouteByHTTPUser string
 
 	CreateConnFn           CreateConnFunc
